@@ -7,6 +7,7 @@ export interface ISnippet extends Document {
   code: string;
   user: Types.ObjectId;
   language: string;
+  likeCount: number;
 }
 
 const snippetSchema: Schema = new Schema(
@@ -36,6 +37,11 @@ const snippetSchema: Schema = new Schema(
       required: true,
       trim: true,
       lowercase: true,
+    },
+
+    likeCount: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }

@@ -105,4 +105,21 @@ router.delete(
   SnippetController.deleteSnippet
 );
 
+//Likes
+router.post(
+  "/:snippetId/like",
+  authenticate,
+  [param("snippetId").isMongoId().withMessage("ID no valido")],
+  handleInputErrors,
+  SnippetController.likeSnippet
+);
+
+router.get(
+  "/:snippetId/like",
+  authenticate,
+  [param("snippetId").isMongoId().withMessage("ID no valido")],
+  handleInputErrors,
+  SnippetController.getLikeStatus
+);
+
 export default router;
