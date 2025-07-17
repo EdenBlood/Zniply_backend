@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
 import Snippet from "../models/Snippet";
 import { sanitizeInput, sanitizeCodeInput } from "../utils/sanitize";
-import User from "../models/User";
+import User, { IUser } from "../models/User";
 import Like from "../models/Like";
 
 interface TipTapEntries {
@@ -9,6 +9,10 @@ interface TipTapEntries {
   description: string;
   code: string;
   language: string;
+}
+
+export interface AuthRequest extends Request {
+  user: IUser;
 }
 
 export class SnippetController {
@@ -143,64 +147,6 @@ export class SnippetController {
       res.json({ msg: "Snippet eliminado correctamente" });
     } catch (error) {
       res.status(500).json({ msg: "Error eliminado el snippet" });
-    }
-  };
-
-  static likeSnippet = async (req: Request, res: Response) => {
-    try {
-      // Revisamos si ya dio like el usuario al snippet
-      const existing = await Like.findOne({
-        user: req.user._id,
-        snippet: req.snippet._id,
-      });
-
-      // Si ya dio like, lo quitamos
-      if (existing) {
-        req.snippet.likeCount -= 1;
-
-        await Promise.all([existing.deleteOne(), req.snippet.save()]);
-
-        res.json({
-          msg: `Le quitaste tu Bombilla a ${req.snippet.title}`,
-          liked: false,
-        });
-        return;
-      }
-
-      // Si no dio like, lo damos
-      req.snippet.likeCount += 1;
-
-      await Promise.all([
-        new Like({ user: req.user._id, snippet: req.snippet._id }).save(),
-        req.snippet.save(),
-      ]);
-
-      res.json({
-        msg: `Le diste una Bombilla a ${req.snippet.title}`,
-        liked: true,
-      });
-    } catch (error) {
-      // Este es el truco: atrapar el error por clave duplicada
-      if (error.code === 11000) {
-        res
-          .status(409)
-          .json({ message: "Ya diste una Bombilla a este Snippet" });
-      } else {
-        res.status(500).json({ msg: "Error al dar Bombilla" });
-      }
-    }
-  };
-
-  static getLikeStatus = async (req: Request, res: Response) => {
-    try {
-      const liked = await Like.exists({
-        user: req.user._id,
-        snippet: req.snippet._id,
-      });
-
-      res.json({ liked: !!liked });
-    } catch (error) {
-      res.status(500).json({ msg: "Error al obtener el like" });
     }
   };
 }

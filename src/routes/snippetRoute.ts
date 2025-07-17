@@ -64,6 +64,7 @@ router.post(
 
 router.get("/", authenticate, SnippetController.getAllSnippets);
 
+// Use que se trae los :snippetId
 router.use("/:snippetId", findSnippetById);
 
 router.get(
@@ -103,23 +104,6 @@ router.delete(
   handleInputErrors,
   isOwnerOfSnippet,
   SnippetController.deleteSnippet
-);
-
-//Likes
-router.post(
-  "/:snippetId/like",
-  authenticate,
-  [param("snippetId").isMongoId().withMessage("ID no valido")],
-  handleInputErrors,
-  SnippetController.likeSnippet
-);
-
-router.get(
-  "/:snippetId/like",
-  authenticate,
-  [param("snippetId").isMongoId().withMessage("ID no valido")],
-  handleInputErrors,
-  SnippetController.getLikeStatus
 );
 
 export default router;
