@@ -8,6 +8,8 @@ export interface ISnippet extends Document {
   user: Types.ObjectId;
   language: string;
   likeCount: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const snippetSchema: Schema = new Schema(

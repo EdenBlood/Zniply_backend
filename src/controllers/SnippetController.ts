@@ -32,7 +32,10 @@ export class SnippetController {
     try {
       const snippet = await Snippet.find({
         title: { $regex: searchTerm, $options: "i" },
-      }).limit(10);
+      })
+        .populate("user", "_id name email")
+        .sort({ likeCount: -1 })
+        .limit(10);
 
       res.json(snippet);
     } catch (error) {
