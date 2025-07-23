@@ -8,7 +8,9 @@ dotenv.config();
 import snippetRoute from "./routes/snippetRoute";
 import authRouter from "./routes/authRouter";
 import likeRouter from "./routes/likeRouter";
-
+import session from "express-session";
+import passport from "passport";
+import oauthRoute from "./routes/oauthRoute";
 const app = express();
 
 const whiteList = [process.env.FRONTEND_URL, process.env.FRONTEND_URL2];
@@ -25,12 +27,22 @@ const corsOptions: CorsOptions = {
 };
 
 app.use(cors(corsOptions));
-
 app.use(express.json());
-
 app.use(cookieParser());
-
 app.use(morgan("dev"));
+
+app.use(
+  session({
+    secret: process.env.AUTH_SECRET || "PasswordSecreto",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+app.use("/api/oauth", oauthRoute);
 
 app.use("/api/snippets", snippetRoute);
 app.use("/api/auth", authRouter);
