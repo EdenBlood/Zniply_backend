@@ -63,6 +63,7 @@ passport.use(
       clientID: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
       callbackURL: `${process.env.BACKEND_URL}/api/oauth/github/callback`,
+      scope: ["user:email"],
     },
     async (_, __, profile: GitHubProfile, done) => {
       try {
