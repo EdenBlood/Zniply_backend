@@ -28,7 +28,6 @@ const userSchema: Schema = new Schema(
     password: {
       required: false,
       type: String,
-      select: false,
     },
 
     email: {

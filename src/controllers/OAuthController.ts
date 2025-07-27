@@ -8,9 +8,9 @@ export default class OAuthController {
     res
       .cookie("token", token, {
         httpOnly: true,
-        secure: false, // true en producción con HTTPS
-        sameSite: "lax", // o 'none' si usás subdominios distintos con HTTPS
-        maxAge: 1000 * 60 * 60 * 24 * 7,
+        secure: process.env.LOCAL === "true" ? false : true, // true en producción con HTTPS
+        sameSite: process.env.LOCAL === "true" ? "lax" : "none", // o 'none' si usás subdominios distintos con HTTPS
+        maxAge: 1000 * 60 * 60 * 24 * 365,
       })
       .redirect(`${process.env.FRONTEND_URL2}/oauth-callback`);
   };
@@ -21,9 +21,9 @@ export default class OAuthController {
     res
       .cookie("token", token, {
         httpOnly: true,
-        secure: false, // true en producción con HTTPS
-        sameSite: "lax", // o 'none' si usás subdominios distintos con HTTPS
-        maxAge: 1000 * 60 * 60 * 24 * 7,
+        secure: process.env.LOCAL === "true" ? false : true, // true en producción con HTTPS
+        sameSite: process.env.LOCAL === "true" ? "lax" : "none", // o 'none' si usás subdominios distintos con HTTPS
+        maxAge: 1000 * 60 * 60 * 24 * 365,
       })
       .redirect(`${process.env.FRONTEND_URL2}/oauth-callback`);
   };

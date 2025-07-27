@@ -95,7 +95,8 @@ export class AuthController {
         msg: "Hemos enviado un email con instrucciones para confirmar tu cuenta",
       });
     } catch (error) {
-      res.status(500).json("Ocurrió un Error");
+      const err = error as Error;
+      res.status(500).json({ error: err.message });
     }
   };
 
@@ -136,7 +137,8 @@ export class AuthController {
         msg: "La cuenta ha sido confirmada, ya puedes iniciar sesión",
       });
     } catch (error) {
-      res.status(500).json("Ocurrió un Error");
+      const err = error as Error;
+      res.status(500).json({ error: err.message });
     }
   };
 
@@ -185,7 +187,8 @@ export class AuthController {
         msg: "Hemos enviado un email con instrucciones para confirmar tu cuenta",
       });
     } catch (error) {
-      res.status(500).json("Ocurrió un Error");
+      const err = error as Error;
+      res.status(500).json({ error: err.message });
     }
   };
 
@@ -235,7 +238,8 @@ export class AuthController {
         msg: "Enviamos un email con instrucciones para cambiar el password",
       });
     } catch (error) {
-      res.status(500).json("Ocurrió un Error");
+      const err = error as Error;
+      res.status(500).json({ error: err.message });
     }
   };
 
@@ -272,7 +276,8 @@ export class AuthController {
 
       res.json({ msg: "Token Valido, cambie su password" });
     } catch (error) {
-      res.status(500).json("Ocurrió un Error");
+      const err = error as Error;
+      res.status(500).json({ error: err.message });
     }
   };
 
@@ -316,16 +321,17 @@ export class AuthController {
       res
         .cookie("token", jwt, {
           httpOnly: true,
-          secure: false, // true en producción con HTTPS
-          sameSite: "lax", // o 'none' si usás subdominios distintos con HTTPS
-          maxAge: 1000 * 60 * 60 * 24 * 7,
+          secure: process.env.LOCAL === "true" ? false : true, // true en producción con HTTPS
+          sameSite: process.env.LOCAL === "true" ? "lax" : "none", // o 'none' si usás subdominios distintos con HTTPS
+          maxAge: 1000 * 60 * 60 * 24 * 365,
         })
         .json({
           msg: "Password actualizado correctamente",
           userId: user._id.toString(),
         });
     } catch (error) {
-      res.status(500).json("Ocurrió un Error");
+      const err = error as Error;
+      res.status(500).json({ error: err.message });
     }
   };
 
@@ -335,12 +341,14 @@ export class AuthController {
     try {
       const user = await User.findOne({ email: sanitizedEmail });
 
+      console.log(user, !!user);
       if (!user) {
         const error = new Error("El usuario no existe");
         res.status(404).json({ error: error.message });
         return;
       }
 
+      console.log(user.confirmed);
       if (!user.confirmed) {
         const error = new Error(
           "El usuario no esta confirmado, Solicite un código de confirmación"
@@ -349,6 +357,11 @@ export class AuthController {
         return;
       }
 
+      console.log(
+        await comparePassword(password, user.password),
+        password,
+        user.password
+      );
       const compare = await comparePassword(password, user.password);
       if (!compare) {
         const error = new Error("Password incorrecto");
@@ -358,20 +371,22 @@ export class AuthController {
 
       //* Crear jwt
       const jwt = generateJWT({ id: user._id.toString() });
+      console.log(jwt);
 
       res
         .cookie("token", jwt, {
           httpOnly: true,
-          secure: false, // true en producción con HTTPS
-          sameSite: "lax", // o 'none' si usás subdominios distintos con HTTPS
-          maxAge: 1000 * 60 * 60 * 24 * 7,
+          secure: process.env.LOCAL === "true" ? false : true, // true en producción con HTTPS
+          sameSite: process.env.LOCAL === "true" ? "lax" : "none", // o 'none' si usás subdominios distintos con HTTPS
+          maxAge: 1000 * 60 * 60 * 24 * 365,
         })
         .json({
           msg: "Sesión iniciada correctamente",
           userId: user._id.toString(),
         });
     } catch (error) {
-      res.status(500).json("Ocurrió un Error");
+      const err = new Error("Ocurrió un Error");
+      res.status(500).json({ error: err.message });
     }
   };
 
@@ -381,12 +396,13 @@ export class AuthController {
   };
 
   static logout = (req: Request, res: Response) => {
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
-    res.json({ msg: "Sesión cerrada correctamente" });
+    res
+      .clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.LOCAL === "true" ? false : true,
+        sameSite: process.env.LOCAL === "true" ? "lax" : "none",
+      })
+      .json({ msg: "Sesión cerrada correctamente" });
     return;
   };
 }
