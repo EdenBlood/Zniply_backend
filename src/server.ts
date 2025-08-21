@@ -36,7 +36,7 @@ app.use(
     secret: process.env.AUTH_SECRET || "PasswordSecreto",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false },
+    cookie: { secure: process.env.LOCAL === "true" ? false : true },
   })
 );
 
